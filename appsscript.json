@@ -1,0 +1,14 @@
+{
+  "timeZone": "America/Vancouver",
+  "dependencies": {
+  },
+  "exceptionLogging": "STACKDRIVER",
+  "runtimeVersion": "V8",
+  "sheets": {
+    "macros": [{
+      "menuName": "addSelectedItemsToOrder",
+      "functionName": "addSelectedItemsToOrder",
+      "defaultShortcut": "Ctrl+Alt+Shift+0"
+    }]
+  }
+}
