@@ -15,15 +15,16 @@ function onEdit(e)
   const spreadsheet = e.source;
   const sheet = spreadsheet.getActiveSheet();
 
-  if (isSingleColumn)
-  {
+  if (sheet.getSheetName() === 'Item Search' && isSingleColumn)
     if (row == 1 && col == 1 && (rowEnd == null || rowEnd == 2 || isSingleRow))
       search(e, spreadsheet, sheet);
-    else if (row > 4 && col == 8)
-      deleteItemsFromOrder(sheet, range, range.getValue(), row, isSingleRow, isSingleColumn, spreadsheet);
     else if (row == 2 && col == 6) // Submission Checkbox
       checkForOrderSubmission(range);
-  }
+    else if (row > 4) // If the body of the item Search is being edited
+      if (col == 8) // Items are being selected in the description column
+        deleteItemsFromOrder(sheet, range, range.getValue(), row, isSingleRow, spreadsheet);
+      else if (col == 1 || col == 4 || col == 7) // The SKU, UoM, or the Descriptions - Categories - Unit of Measure - SKU # column are being edited (The user is not suppose to edit these fields)
+        undoUserMistake(sheet, e, range, isSingleRow, spreadsheet)
 }
 
 /**
@@ -105,15 +106,16 @@ function checkForOrderSubmission(range)
  * This function handles the task of deleting items from the users order on the Item Search sheet. 
  * It finds the missing descriptions and it moves the data up to fill in the gap.
  * 
- * @param {Sheet}       sheet      : The Item Search sheet
- * @param {Range}       range      : The active range
- * @param {String[][]}  value      : The values in the range that were editted
- * @param {Number}       row       : The first row that was editted
- * @param {Boolean}  isSingleRow   : Whether or not a single row was editted
- * @param {Boolean} isSingleColumn : Whether or not a single column was editted
+ * @param {Sheet}        sheet      : The Item Search sheet
+ * @param {Range}        range      : The active range
+ * @param {String[][]}   value      : The values in the range that were editted
+ * @param {Number}        row       : The first row that was editted
+ * @param {Boolean}   isSingleRow   : Whether or not a single row was editted
+ * @param {Boolean}  isSingleColumn : Whether or not a single column was editted
+ * @param {Spreadsheet} spreadsheet : The active spreadsheet
  * @author Jarren Ralf
  */
-function deleteItemsFromOrder(sheet, range, value, row, isSingleRow, isSingleColumn, spreadsheet)
+function deleteItemsFromOrder(sheet, range, value, row, isSingleRow, spreadsheet)
 {
   const startTime = new Date().getTime(); // Used for the function runtime
   spreadsheet.toast('Checking for possible lines to delete...')
@@ -125,7 +127,7 @@ function deleteItemsFromOrder(sheet, range, value, row, isSingleRow, isSingleCol
     
     if (isSingleRow)
     {
-      if (isSingleColumn && !Boolean(value)) // Was a single cell editted?, is the value blank? or is the quantity zero?
+      if (!Boolean(value)) // Was a single cell editted?, is the value blank? or is the quantity zero?
       {
         const orderedItems = itemsOrderedRange.getValues();
         orderedItems.shift(); // This is the item that was deleted by the user
@@ -345,6 +347,29 @@ function search(e, spreadsheet, sheet)
   }
 
   sheet.getRange(2, 7).setValue((new Date().getTime() - startTime)/1000 + " seconds");
+}
+
+/**
+ * This function checks if the user has accidently changed one cell on the spreadsheet that they shouldn't have. If the oldValue is not undefined, then 
+ * it places the previous value back into the active range.
+ * 
+ * @param {Sheet}          sheet    : The Item Search sheet
+ * @param {Event Object}     e      : The event object
+ * @param {Range}          range    : The active range
+ * @param {Boolean}     isSingleRow : Whether or not a single row was editted
+ * @param {Spreadsheet} spreadsheet : The active spreadsheet
+ * @author Jarren Ralf
+ */
+function undoUserMistake(sheet, e, range, isSingleRow, spreadsheet)
+{
+  const startTime = new Date().getTime(); // Used for the function runtime
+
+  if (isSingleRow && e.oldValue != undefined) // Single Cell is being changed
+  {
+    range.setValue(e.oldValue);
+    spreadsheet.toast('User Change has been undone.')
+    sheet.getRange(2, 7).setValue((new Date().getTime() - startTime)/1000 + " seconds");
+  }
 }
 
 /**
