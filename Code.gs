@@ -106,12 +106,11 @@ function checkForOrderSubmission(range)
  * This function handles the task of deleting items from the users order on the Item Search sheet. 
  * It finds the missing descriptions and it moves the data up to fill in the gap.
  * 
- * @param {Sheet}        sheet      : The Item Search sheet
- * @param {Range}        range      : The active range
- * @param {String[][]}   value      : The values in the range that were editted
- * @param {Number}        row       : The first row that was editted
- * @param {Boolean}   isSingleRow   : Whether or not a single row was editted
- * @param {Boolean}  isSingleColumn : Whether or not a single column was editted
+ * @param {Sheet}          sheet    : The Item Search sheet
+ * @param {Range}          range    : The active range
+ * @param {String[][]}     value    : The values in the range that were editted
+ * @param {Number}          row     : The first row that was editted
+ * @param {Boolean}     isSingleRow : Whether or not a single row was editted
  * @param {Spreadsheet} spreadsheet : The active spreadsheet
  * @author Jarren Ralf
  */
