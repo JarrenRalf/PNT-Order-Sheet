@@ -16,6 +16,13 @@ function onEdit(e)
   const spreadsheet = e.source;
   const sheet = spreadsheet.getActiveSheet();
 
+  Logger.log('range: ' + range.getA1Notation())
+  Logger.log('row: ' + row)
+  Logger.log('col: ' + col)
+  Logger.log('rowEnd: ' + rowEnd)
+  Logger.log('isSingleRow: ' + isSingleRow)
+  Logger.log('isSingleColumn: ' + isSingleColumn)
+
   if (sheet.getSheetName() === 'Item Search' && isSingleColumn)
     if (row == 1 && col == 1 && (rowEnd == null || rowEnd == 2 || isSingleRow))
       search(e, spreadsheet, sheet);
@@ -100,6 +107,8 @@ function allItems()
 function checkForOrderSubmission(range, sheet, spreadsheet)
 {
   const startTime = new Date().getTime(); // Used for the function runtime
+  Logger.log('checkForOrderSubmission is being run...')
+  Logger.log('Is box checked? : ' + range.isChecked())
   range.offset(2, -2).setValue(startTime); // Place the timestamp in one of the hidden cells
   SpreadsheetApp.flush(); // Force the change on the spreadsheet first
 
