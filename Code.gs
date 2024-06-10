@@ -219,6 +219,7 @@ function getExportData(itemSearchSheet, spreadsheet)
           .setHorizontalAlignments(new Array(numItems).fill(['center', 'left', 'right', 'center', 'left']))
           .setValues(values.map(item => [today, poNumber, item[1], item[0], item[3]]));
         spreadsheet.getSheetByName('Last Export').clearContents().getRange(1, 1, numRows + 1, 5).setNumberFormat('@').setValues([['', '', '', poNumber, deliveryInstructions] , ...values]) // Used for email
+        SpreadsheetApp.flush();
         const exportData_WithDiscountedPrices = [];
 
         /* If there are delivery instructions, make them the final line of the order.
