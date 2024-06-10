@@ -16,6 +16,9 @@ function onEdit(e)
   const spreadsheet = e.source;
   const sheet = spreadsheet.getActiveSheet();
 
+  if (range.getA1Notation() === 'D2')
+    Logger.log('*** SUBMISSION BOX EDITTED ***')
+
   Logger.log('range: ' + range.getA1Notation())
   Logger.log('row: ' + row)
   Logger.log('col: ' + col)
