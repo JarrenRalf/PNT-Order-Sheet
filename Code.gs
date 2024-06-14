@@ -109,21 +109,29 @@ function allItems()
  */
 function checkForOrderSubmission(range, sheet, spreadsheet)
 {
-  const startTime = new Date().getTime(); // Used for the function runtime
-  Logger.log('checkForOrderSubmission is being run...')
-  Logger.log('Is box checked? : ' + range.isChecked())
-  range.offset(2, -2).setValue(startTime); // Place the timestamp in one of the hidden cells
-  SpreadsheetApp.flush(); // Force the change on the spreadsheet first
-
-  if (range.isChecked())
+  try
   {
-    const isSubmissionSuccessful = getExportData(sheet, spreadsheet);
-    Logger.log('Is submission successful? : ' + isSubmissionSuccessful);
-    range.offset(0, 1).setValue((new Date().getTime() - startTime)/1000 + " seconds");
+    const startTime = new Date().getTime(); // Used for the function runtime
+    Logger.log('checkForOrderSubmission is being run...')
+    Logger.log('Is box checked? : ' + range.isChecked())
+    range.offset(2, -2).setValue(startTime); // Place the timestamp in one of the hidden cells
     SpreadsheetApp.flush(); // Force the change on the spreadsheet first
-    
-    if (isSubmissionSuccessful)
-      SpreadsheetApp.getUi().alert('Your order has been submitted.\n\nThank You!');
+
+    if (range.isChecked())
+    {
+      const isSubmissionSuccessful = getExportData(sheet, spreadsheet);
+      Logger.log('Is submission successful? : ' + isSubmissionSuccessful);
+      range.offset(0, 1).setValue((new Date().getTime() - startTime)/1000 + " seconds");
+      SpreadsheetApp.flush(); // Force the change on the spreadsheet first
+      
+      if (isSubmissionSuccessful)
+        SpreadsheetApp.getUi().alert('Your order has been submitted.\n\nThank You!');
+    }
+  }
+  catch (err)
+  {
+    Logger.log(err['stack'])
+    SpreadsheetApp.getUi().alert('Your order submission was unsuccessful.\n\nHere is the error:\n\n' + err['stack']);
   }
 }
 
