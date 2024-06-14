@@ -118,6 +118,7 @@ function checkForOrderSubmission(range, sheet, spreadsheet)
   if (range.isChecked())
   {
     const isSubmissionSuccessful = getExportData(sheet, spreadsheet);
+    Logger.log('Is submission successful? : ' + isSubmissionSuccessful);
     range.offset(0, 1).setValue((new Date().getTime() - startTime)/1000 + " seconds");
     SpreadsheetApp.flush(); // Force the change on the spreadsheet first
     
@@ -196,6 +197,7 @@ function deleteItemsFromOrder(sheet, range, value, row, isSingleRow, spreadsheet
 function getExportData(itemSearchSheet, spreadsheet)
 {
   spreadsheet.toast('Your request is being processed...')
+  Logger.log('Getting export data...')
 
   try
   {
