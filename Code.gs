@@ -218,8 +218,9 @@ function getExportData(itemSearchSheet, spreadsheet)
 
       if (!values.every(qty => isBlank(qty[1]))) // Not every order quantity is blank
       {
-        const deliveryInstructions = itemSearchSheet.getSheetValues(2, 7, 1, 1)[0][0];
-        const poNumber = itemSearchSheet.getSheetValues(1, 6, 1, 1)[0][0];
+        const deliveryInstructions = itemSearchSheet.getSheetValues(2, 7, 1, 1)[0][0].toString();
+        const poNumber = itemSearchSheet.getSheetValues(1, 6, 1, 1)[0][0].toString();
+        const isPoNumTooLong = poNumber.length > 69;
         const customerAccountNumber = itemSearchSheet.getSheetValues(4, 3, 1, 1)[0][0];
         const submittedOrdersSheet = spreadsheet.getSheetByName('Submitted Orders');
         const lastRow = submittedOrdersSheet.getLastRow();
@@ -238,14 +239,23 @@ function getExportData(itemSearchSheet, spreadsheet)
         /* If there are delivery instructions, make them the final line of the order.
          * If necessary, make multiple comment lines if comments are > 75 characters long.
          */
-        const exportData = [['H', customerAccountNumber, poNumber, 'PNT DELIVERY'], ...values, // The SKUs and quantities
-          ['I', 'Provide your preferred delivery / pick up date and location below:', '', ''],
-          ...(isNotBlank(deliveryInstructions)) ? deliveryInstructions.match(/.{1,75}/g).map(c => ['I', c, '', '']) : [['I', '**Customer left this field blank**', '', '']]];
+        const exportData = (isPoNumTooLong) ? 
+                            [['H', customerAccountNumber,  '', 'PNT DELIVERY'],
+                            ...poNumber.match(/.{1,69}/g).map(c => ['C', 'PO #: ' + c, '', '']),
+                            ...values, // The SKUs and quantities
+                            ['I', 'Provide your preferred delivery / pick up date and location below:', '', ''],
+                            ...(isNotBlank(deliveryInstructions)) ? deliveryInstructions.match(/.{1,75}/g).map(c => ['I', c, '', '']) : [['I', '**Customer left this field blank**', '', '']]]
+                          :
+                            [['H', customerAccountNumber, poNumber, 'PNT DELIVERY'],
+                            ...values, // The SKUs and quantities
+                            ['I', 'Provide your preferred delivery / pick up date and location below:', '', ''],
+                            ...(isNotBlank(deliveryInstructions)) ? deliveryInstructions.match(/.{1,75}/g).map(c => ['I', c, '', '']) : [['I', '**Customer left this field blank**', '', '']]];
 
         exportData.map(item => {
+          Logger.log(item)
           if (item[0] === 'H')
             exportData_WithDiscountedPrices.push(['H', item[1], item[2], item[3]]);
-          else if (item[0] === 'I')
+          else if (item[0] === 'I' || item[0] === 'C')
             exportData_WithDiscountedPrices.push(['I', item[1], '', '']);
           else // There was no line indicator
           {
@@ -289,7 +299,7 @@ function getExportData(itemSearchSheet, spreadsheet)
                   )
 
             if (isNotBlank(item[4])) // There are notes for the current line
-              exportData_WithDiscountedPrices.push(...(item[4]).match(/.{1,68}/g).map(c => ['C', 'Notes: ' + c, '', '']))
+              exportData_WithDiscountedPrices.push(...(item[4]).toString().match(/.{1,68}/g).map(c => ['C', 'Notes: ' + c, '', '']))
           }
         })
 
