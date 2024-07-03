@@ -17,14 +17,14 @@ function onEdit(e)
   const sheet = spreadsheet.getActiveSheet();
 
   if (range.getA1Notation() === 'D2')
-    Logger.log('*** SUBMISSION BOX EDITTED ***')
+    Logger.log('*** SUBMISSION BOX EDITTED ***');
 
-  Logger.log('range: ' + range.getA1Notation())
-  Logger.log('row: ' + row)
-  Logger.log('col: ' + col)
-  Logger.log('rowEnd: ' + rowEnd)
-  Logger.log('isSingleRow: ' + isSingleRow)
-  Logger.log('isSingleColumn: ' + isSingleColumn)
+  Logger.log('range: ' + range.getA1Notation());
+  Logger.log('row: ' + row);
+  Logger.log('col: ' + col);
+  Logger.log('rowEnd: ' + rowEnd);
+  Logger.log('isSingleRow: ' + isSingleRow);
+  Logger.log('isSingleColumn: ' + isSingleColumn);
 
   if (sheet.getSheetName() === 'Item Search' && isSingleColumn)
     if (row == 1 && col == 1 && (rowEnd == null || rowEnd == 2 || isSingleRow))
@@ -35,7 +35,7 @@ function onEdit(e)
       if (col == 6) // Items are being selected in the description column
         deleteItemsFromOrder(sheet, range, range.getValue(), row, isSingleRow, spreadsheet);
       else if (col == 1 || col == 3 || col == 5) // The SKU, UoM, or the Descriptions - Categories - Unit of Measure - SKU # column are being edited (The user is not suppose to edit these fields)
-        undoUserMistake(sheet, e, range, isSingleRow, spreadsheet)
+        undoUserMistake(sheet, e, range, isSingleRow, spreadsheet);
 }
 
 /**
@@ -204,8 +204,8 @@ function deleteItemsFromOrder(sheet, range, value, row, isSingleRow, spreadsheet
  */
 function getExportData(itemSearchSheet, spreadsheet)
 {
-  spreadsheet.toast('Your request is being processed...')
-  Logger.log('Getting export data...')
+  spreadsheet.toast('Your request is being processed...');
+  Logger.log('Getting export data...');
 
   try
   {
@@ -223,14 +223,14 @@ function getExportData(itemSearchSheet, spreadsheet)
         const customerAccountNumber = itemSearchSheet.getSheetValues(4, 3, 1, 1)[0][0];
         const submittedOrdersSheet = spreadsheet.getSheetByName('Submitted Orders');
         const lastRow = submittedOrdersSheet.getLastRow();
-        const today = new Date().toLocaleString();
+        const today = new Date().toString();
         const previousBackgroundColour = submittedOrdersSheet.getRange(lastRow, 1).getBackground();
         const numItems = values.length;
-        submittedOrdersSheet.getRange(lastRow + 1, 1, numItems, 5)
+        submittedOrdersSheet.getRange(lastRow + 1, 1, numItems, 6)
           .setBackground((previousBackgroundColour !== '#ffffff') ? 'white' : '#c9daf8')
           .setNumberFormat('@')
-          .setHorizontalAlignments(new Array(numItems).fill(['center', 'left', 'right', 'center', 'left']))
-          .setValues(values.map(item => [today, poNumber, item[1], item[0], item[3]]));
+          .setHorizontalAlignments(new Array(numItems).fill(['center', 'left', 'right', 'center', 'left', 'left']))
+          .setValues(values.map(item => [today, poNumber, item[1], item[0], item[3], item[4]]));
         spreadsheet.getSheetByName('Last Export').clearContents().getRange(1, 1, numRows + 1, 5).setNumberFormat('@').setValues([['', '', '', poNumber, deliveryInstructions] , ...values]) // Used for email
         SpreadsheetApp.flush();
         const exportData_WithDiscountedPrices = [];
@@ -341,9 +341,10 @@ function getExportData(itemSearchSheet, spreadsheet)
   catch (e)
   {
     itemSearchSheet.getRange(2, 4).uncheck();
+    Logger.log('The following error occured at ' + (new Date().toString()) + ' during order submission:\n\n' + e['stack']);
     SpreadsheetApp.flush();
     const ui = SpreadsheetApp.getUi();
-    ui.alert('Error: Submission Failure', 'Please contact Jarren at PNT and let him know that the following error occured during order submission:\n\n' + e['stack'], ui.ButtonSet.OK);
+    ui.alert('Error: Submission Failure', 'Please contact Jarren at PNT and let him know that the following error occured at ' + (new Date().toString()) + ' during order submission:\n\n' + e['stack'], ui.ButtonSet.OK);
   }
 }
 
